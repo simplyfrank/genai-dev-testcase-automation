@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Run Pylint on all Python files
+pylint **/*.py
+
+# Get the exit code from Pylint
+PYLINT_EXIT_CODE=$?
+
+# If Pylint exits with a non-zero code, cancel the push
+if [ $PYLINT_EXIT_CODE -ne 0 ]; then
+    echo "Pylint found issues. Please fix them before pushing."
+    exit 1
+fi
+
+# If Pylint passes, allow the push to proceed
+exit 0

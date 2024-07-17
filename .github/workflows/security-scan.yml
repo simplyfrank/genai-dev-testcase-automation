@@ -1,0 +1,35 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  codeguru-reviewer:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }} 
+        
+    - name: Amazon CodeGuru Reviewer scan
+      uses: aws-actions/codeguru-reviewer@v1.1
+      with:
+        build_path: target
+        s3_bucket: codeguru-reviewer-my-bucket
+        
+    - name: Upload CodeGuru results  
+      if: ${{ github.event_name != 'push' }}
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: codeguru-results.sarif.json

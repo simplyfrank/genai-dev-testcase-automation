@@ -1,0 +1,48 @@
+Name: frontend-deploy-workflow
+SchemaVersion: 1.0
+
+Triggers:
+  - Type: PUSH
+    Branches:
+      - main
+
+Actions:
+  Build:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:
+      Steps:
+        - Run: npm install
+        - Run: npm run build
+    Outputs:
+      Artifacts:
+        - Name: frontend_artifact
+          Files:
+            - dist/**/*
+      AutoDiscoverReports:
+        Enabled: false
+    Compute:
+      Type: EC2
+      Fleet: Linux.x86-64.Large
+    Environment:
+      Name: Staging
+
+  PublishToS3:
+    Identifier: aws/s3-publish@v1
+    Environment:
+      Name: Prod
+    Inputs:
+      Sources:
+        - WorkflowSource
+      Artifacts:
+        - frontend_artifact
+    Compute:
+      Type: EC2
+    Configuration:
+      DestinationBucketName: my-frontend-bucket
+      TargetPath: website/
+      SourcePath: /artifacts/frontend_artifact/dist
+    DependsOn:
+      - Build

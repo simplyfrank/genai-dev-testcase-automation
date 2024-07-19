@@ -1,0 +1,35 @@
+Name: frontend-build-workflow
+SchemaVersion: 1.0
+
+Triggers:
+- Type: PUSH
+  Branches:
+  - main
+
+Actions:
+  BuildFrontend:
+    Identifier: aws/build@v1
+    Environment:
+      Name: codecatalyst-frontend-environment
+      Description: Environment for building the frontend
+      ComputeType: BUILD
+      ProvisioningEngine: CODEBUILD
+      ProvisioningEngineVersion: "0.1"
+      EnvironmentType: LINUX_CONTAINER
+      ComputeResources:
+        MaxVCPUs: 2
+    Inputs:
+      Sources:
+      - WorkflowSource
+    Configuration:
+      Steps:
+      - Run: echo "Installing Node.js and npm..."
+      - Run: nvm install 16
+      - Run: npm install
+      - Run: echo "Building the frontend..."
+      - Run: npm run build
+    Outputs:
+      Artifacts:
+      - Name: FrontendArtifact
+        Files:
+        - "dist/**/*"

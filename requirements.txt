@@ -21,6 +21,8 @@ pyflakes==3.2.0
 pylint==3.2.5
 pytest==8.2.2
 python-dateutil==2.9.0.post0
+ pytest-flask==1.2.0
+ selenium==4.8.2
 pytz==2024.1
 six==1.16.0
 tomlkit==0.13.0

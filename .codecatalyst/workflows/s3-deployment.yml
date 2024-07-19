@@ -1,0 +1,40 @@
+Name: s3-deployment-workflow
+SchemaVersion: 1.0
+
+Triggers:
+- Type: PUSH
+  Branches:
+  - main
+
+Actions:
+  BuildFrontend:
+    Identifier: aws/codebuild@1.0.0
+    Inputs:
+      Sources:
+      - WorkflowSource
+    Outputs:
+      Artifacts:
+      - frontend-build-artifact
+    Configuration:
+      ProjectName: frontend-build-project
+      PrimarySource: WorkflowSource
+      Artifacts:
+        ArtifactName: frontend-build-artifact
+        ArtifactPath: dist
+
+  PublishToS3:
+    Identifier: aws/s3-sync@1
+    Environment:
+      Name: frontend-deployment-env
+      Connections:
+      - Name: frontend-aws-account
+        Role: frontend-s3-deployment-role
+    Inputs:
+      Sources:
+      - WorkflowSource
+      Artifacts:
+      - frontend-build-artifact
+    Configuration:
+      BucketName: frontend-deployment-bucket
+      BucketPrefix: /
+      SourceArtifactLocation: frontend-build-artifact/dist
